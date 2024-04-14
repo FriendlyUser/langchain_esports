@@ -1,2 +1,10 @@
 __pycache__
 set_env.bat
+LCS
+LEC
+LCK
+LPL
+.env
+*.txt
+*.png
+chroma.sqlite3
