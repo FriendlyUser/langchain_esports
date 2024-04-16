@@ -87,3 +87,5 @@ Ingest data
 cd packages/rag-gemini-multi-modal 
 python ingest.py
 ```
+
+For MSI 2024, there will be a lot of games to bet on, regenerate rag model on april 21 2024.
