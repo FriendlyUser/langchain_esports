@@ -89,3 +89,5 @@ python ingest.py
 ```
 
 For MSI 2024, there will be a lot of games to bet on, regenerate rag model on april 21 2024.
+
+For this system, I think I have to filter the games so that its only for the teams I am comparing to. The scorecards are not enough to subfilter, need to limit the data going into the rag model.
