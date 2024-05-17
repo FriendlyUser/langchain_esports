@@ -54,9 +54,11 @@ developerKey = os.environ.get('YOUTUBE_API_KEY')
 # Replace 'YOUR_API_KEY' with your actual API key
 youtube = build('youtube', 'v3', developerKey=developerKey)
 
+channel_name = "LCK Global"
+channel_name = "lolesportsvods"
 # Step 2: Find the channel ID for LCK Global
 channel_response = youtube.search().list(
-    q='LCK Global',
+    q=channel_name,
     type='channel',
     part='id,snippet',
     maxResults=1
@@ -65,17 +67,18 @@ channel_response = youtube.search().list(
 channel_id = channel_response['items'][0]['id']['channelId']
 
 pattern = r"^(?!.*Game \d+).*vs.*\|.*Highlight"
+query = 'G2 vs T1 | MSI 2024'
 # Step 3: Search for highlight videos in the LCK Global channel
 videos_response = youtube.search().list(
     part='id,snippet',
     channelId=channel_id,
-    q='geng vs hle 2024 highlight 03.06',
+    q=query,
     type='video',
-    maxResults=1  # You can adjust this number based on your needs
+    maxResults=5  # You can adjust this number based on your needs
 ).execute()
 
 
-csv_file_path = 'videos_info_2.csv'
+csv_file_path = 'videos_info.csv'
 existing_video_ids = set()
 
 try:
@@ -93,18 +96,19 @@ for video in videos_response['items']:
     
     # Check if the videoID is already in the CSV, skip if it exists
     if video_id not in existing_video_ids:
-        if re.match(pattern, video_title):  # Assuming `pattern` is previously defined
-            matched_items.append(video)
+        # if re.match(pattern, video_title):  # Assuming `pattern` is previously defined
+        matched_items.append(video)
 
 # make a simple csv that contains, title, extract team t1,t2 from title and then save as pandas dataframe
-# for video in matched_items:
-#     video_id = video['id']['videoId']
-#     # todo dont think I need this here
-#     transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-#     transcript = transcript_list.find_generated_transcript(['en'])
-#     transcript_data = transcript.fetch()
-#     with open(f'data/{video_id}.json', 'w') as f:
-#         json.dump(transcript_data, f)
+for video in matched_items:
+    video_id = video['id']['videoId']
+    # todo dont think I need this here
+    transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+    transcript = transcript_list.find_generated_transcript(['en'])
+    transcript_data = transcript.fetch()
+    video_title = video['snippet']['title'].replace("|", "")
+    with open(f'data/msi/{video_title}.json', 'w') as f:
+        json.dump(transcript_data, f)
 
 # Open the CSV file in append mode ('a') so we don't overwrite existing data
 with open(csv_file_path, 'a', newline='', encoding='utf-8') as csvfile:
