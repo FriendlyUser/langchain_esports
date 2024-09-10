@@ -79,7 +79,7 @@ def analyze_data(data, iterations, output_path):
         file.write(data)
 
     system_prompt = """Analyze the following data to predict the matchup between KT Rolster and FearX: focus on player performance, team strength and playmaking.
-    In a best of 5 focus on the ability of players or the team to make decision that lead to their vicotry."""
+    In a best of 5 focus on the ability of players or the team to make decision that lead to their victory."""
 
     user_prompt = f"""Analyze the following data involving lck playoff games, the 
     team roster and reddit comments to predict the matchup between KT Rolster and FearX. 
