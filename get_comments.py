@@ -15,7 +15,7 @@ reddit = praw.Reddit(
 )
 
 subreddit = reddit.subreddit('leagueoflegends')
-query = 'KT Rolster LCK 2024 Summer'
+query = 'LCK 2024 Summer Playoffs'
 
 # Set the threshold for post age (2 months ago)
 two_months_ago = datetime.datetime.now() - datetime.timedelta(days=60)
@@ -64,8 +64,13 @@ def download_image_curl(image_url, save_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def clean_submission(text):
+    # remove characters like / to save to a file
+    return text.replace("/", "").replace("\n", " ").replace("?", "").replace("|", "")
+
+# add function to validate submission, if not valid skip
 # Scan the subreddit with the specified query
-for submission in subreddit.search(query, limit=100):  # Adjust the limit as needed
+for submission in subreddit.search(query, limit=10):  # Adjust the limit as needed
     # Check if the post is at least a month old
     # submission_date = datetime.datetime.fromtimestamp(submission.created_utc)
     submission_date = datetime.datetime.fromtimestamp(submission.created_utc)
@@ -76,12 +81,12 @@ for submission in subreddit.search(query, limit=100):  # Adjust the limit as nee
     print(f"Title: {submission.title}, URL: {submission.url}")
 
     # Save submission text if not already saved
-    text_file_path = os.path.join(text_folder, f"{submission.id}.txt")
+    text_file_path = os.path.join(text_folder, f"{clean_submission(submission.title)}.txt")
     if not os.path.exists(text_file_path):
         with open(text_file_path, "w", errors="ignore") as f:
             f.write(submission.selftext)
     else:
-        print(f"Text already exists: {submission.id}.txt")
+        print(f"Text already exists: {submission.title}.txt")
 
     # Extract and download images
     extracted_urls = extract_urls_from_markdown(submission.selftext)
@@ -90,15 +95,15 @@ for submission in subreddit.search(query, limit=100):  # Adjust the limit as nee
         download_image_curl(url, image_save_path)
 
     # Extract and save comments
-    comments_file_path = os.path.join(comments_folder, f"{submission.id}_comments.txt")
+    comments_file_path = os.path.join(comments_folder, f"{clean_submission(submission.title)}_comments.txt")
     if not os.path.exists(comments_file_path):
         with open(comments_file_path, "w", errors="ignore") as f:
-            submission.comments.replace_more(limit=None)  # Expand all MoreComments objects
-            for comment in submission.comments.list():
-                if isinstance(comment, praw.models.Comment) and comment.score >= 3:
+            submission.comments.replace_more(limit=10)  # Expand all MoreComments objects
+            comments = submission.comments.list()
+            top_comments = sorted(comments, key=lambda c: c.score, reverse=True)[:100]
+            for comment in top_comments:
+                if isinstance(comment, praw.models.Comment):
                     f.write(f"{comment.body}\n")
-                elif isinstance(comment, praw.models.Comment):
-                    print(f"Skipping comment with less than 5 upvotes: {comment.body[:30]}... ({comment.score} upvotes)")
         print(f"Comments saved for submission: {submission.title}")
     else:
         print(f"Comments already exist: {submission.id}_comments.txt")

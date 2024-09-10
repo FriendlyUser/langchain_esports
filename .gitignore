@@ -9,3 +9,5 @@ LPL
 *.png
 chroma.sqlite3
 league_pro_games.csv
+
+!packages/rag-gemini-multi-modal/KT_Rolster/roster/*.html
